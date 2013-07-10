@@ -681,6 +681,7 @@ module Bundler
     desc "gem GEM", "Creates a skeleton for creating a rubygem"
     method_option :bin, :type => :boolean, :default => false, :aliases => '-b', :banner => "Generate a binary for your library."
     method_option :test, :type => :string, :lazy_default => 'rspec', :aliases => '-t', :banner => "Generate a test directory for your library: 'rspec' is the default, but 'minitest' is also supported."
+    method_option :template, :type => :string, :banner => "Generate your library using ERB templates in this directory. Default is the 'template' directory included with bundler."
     method_option :edit, :type => :string, :aliases => "-e",
                   :lazy_default => [ENV['BUNDLER_EDITOR'], ENV['VISUAL'], ENV['EDITOR']].find{|e| !e.nil? && !e.empty? },
                   :required => false, :banner => "/path/to/your/editor",
@@ -705,6 +706,11 @@ module Bundler
         :test            => options[:test]
       }
       gemspec_dest = File.join(target, "#{name}.gemspec")
+
+      # Use the template files in the provided directory instead of the defaults.
+      # Some or all of the template files can be overridden in this way.
+      @source_paths = source_paths.unshift options[:template] if not options[:template].to_s.empty?
+
       template(File.join("newgem/Gemfile.tt"),               File.join(target, "Gemfile"),                             opts)
       template(File.join("newgem/Rakefile.tt"),              File.join(target, "Rakefile"),                            opts)
       template(File.join("newgem/LICENSE.txt.tt"),           File.join(target, "LICENSE.txt"),                         opts)
